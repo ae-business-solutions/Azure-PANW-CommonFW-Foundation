@@ -19,23 +19,23 @@ First, you'll need to create new Terraform Workspace for each of the repositorie
 	* `Environment Variables` can be used to store credentials and other things that Terraform needs to run.
  - [ ] **Optional** Instead of creating your variables in each individual Workspace, create them as a **Variable Set** in Terraform Cloud so you don't have to re-create them (and manage variables individually) in each Workspace.
  - [ ] Remember those values that were the output of the Azure CLI command we used to create our Service Principal?  We'll be creating an `Environment Variable` for the 4 values required to authenticate Terraform Cloud to Azure with our Service Principal.  The 4 values we'll be using are:  `ARM_CLIENT_ID` (derived from the `appID` output of our command), `ARM_CLIENT_SECRET` (derived from the `password` value), `ARM_SUBSCRIPTION_ID` (which should be set to the subscription ID we created the Service Principal in), and `ARM_TENANT_ID` (derived from the `tenant` value).  For each of those 4 variables, perform the following steps:
-  * Click `Add variable`.  Select `Environment variable`.
+	* Click `Add variable`.  Select `Environment variable`.
 	* The `Key` will be the `ARM_XXXXX` variable name (such as `ARM_CLIENT_ID`).
 	* The `Value` will be the appropriate value per the above.
 	* `Description` is optional. You *should* check `Sensitive` for `ARM_CLIENT_SECRET` so the client password is write-only and not visible.
 
  - [ ] We don't want to accidentally leak sensitive data into our repository, such as passwords or auth codes, so we'll store a few sensitive Terraform variables in Terraform Cloud as well.  **You can add these individually to the Management and Infrastructure Workspaces, or create these as an additional Variable Set and assign it to the Management and Infrastructure Workspaces.**
-  * There are 4 Terraform variables we'll be adding.  `panorama-serial `, `auth-key`, `admin-user`, and `admin-pass `.
-  * Click `Add variable`.  Select `Terraform variable`.
-  * The `Key` will be the variable name (such as `panorama-serial`).
-  * The `Value` will be the appropriate value (the Serial Number you've pre-generated from the PANW Customer Support Portal for your Panorama instance, a temporary value for the auth-key  we'll provision in Panorama for VM-series bootstrapping (use any value as a placeholder), the initial admin username we want to create in Panorama and our NGFWs, and the password for that admin account).
-  * `Description` is optional. You *should* check `Sensitive` for `admin-pass` so the admin password is write-only and not visible.
+	* There are 4 Terraform variables we'll be adding.  `panorama-serial `, `auth-key`, `admin-user`, and `admin-pass `.
+	* Click `Add variable`.  Select `Terraform variable`.
+	* The `Key` will be the variable name (such as `panorama-serial`).
+	* The `Value` will be the appropriate value (the Serial Number you've pre-generated from the PANW Customer Support Portal for your Panorama instance, a temporary value for the auth-key  we'll provision in Panorama for VM-series bootstrapping (use any value as a placeholder), the initial admin username we want to create in Panorama and our NGFWs, and the password for that admin account).
+	* `Description` is optional. You *should* check `Sensitive` for `admin-pass` so the admin password is write-only and not visible.
 
 Your Azure environment variables should look similar to this in each of your Workspaces (or in your Variable Set):
 
 ![TC Variables](images/Terraform-Cloud-Variables.png)
 
-Your Terraform variables should look similar to this in your Management Workspace (or in your Variable Set):
+Your Terraform variables should look similar to this in your Management and Infrastructure Workspaces (or in your Variable Set):
 
 ![TC Variables](images/Terraform-Cloud-Variables-PAN.png)
 
