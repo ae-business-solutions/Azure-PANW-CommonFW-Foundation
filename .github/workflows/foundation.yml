@@ -1,0 +1,92 @@
+# GitHub Workflow to build the Azure Foundation
+name: Foundation
+
+# Only run this Workflow for pull requests on branches or pushes to 'main'.
+# Limited to commits that make changes to the foundation directory in the repo.
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths:
+    - 'foundation/**'
+  pull_request:
+    paths:
+    - 'foundation/**'
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v1
+      with:
+        cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+
+    - name: Terraform Format
+      id: fmt
+      working-directory: ./foundation
+      run: terraform fmt
+      continue-on-error: true
+
+    - name: Terraform Init
+      id: init
+      working-directory: ./foundation
+      run: terraform init
+
+    - name: Terraform Plan
+      id: plan
+      if: github.event_name == 'pull_request'
+      working-directory: ./foundation
+      run: terraform plan -no-color
+      continue-on-error: true
+
+    - uses: actions/github-script@0.9.0
+      if: github.event_name == 'pull_request'
+      env:
+        PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        script: |
+          const output = `#### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
+          #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
+          #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
+          <details>
+          <summary>Show Plan</summary>
+          \`\`\`
+          ${process.env.PLAN}
+          \`\`\`
+          </details>
+          
+          **Pusher: \`@${{ github.actor }}\`, Action: \`${{ github.event_name }}\`**`;
+            
+          github.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: output
+          })
+
+    - name: Terraform Plan Status
+      if: steps.plan.outcome == 'failure'
+      run: exit 1
+
+    - name: Checkov
+      if: github.event_name == 'pull_request'
+      id: checkov
+      uses: bridgecrewio/checkov-action@master
+      with:
+        directory: ./foundation
+        quiet: true
+        framework: terraform
+        output_format: github_failed_only
+        soft_fail: true 
+
+    - name: Terraform Apply
+      working-directory: ./foundation
+      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      run: terraform apply -auto-approve
