@@ -37,7 +37,7 @@ Your Azure environment variables should look similar to this in each of your Wor
 
 Your Terraform variables should look similar to this in your Management and Infrastructure Workspaces (or in your Variable Set):
 
-![TC Variables](images/Terraform-Cloud-Variables-PAN.png)
+![TC Variables PAN](images/Terraform-Cloud-Variables-PAN.png)
 
 Next, you'll need to generate a *Terraform Cloud API Token*.  If you have a Terraform Cloud organization that has a Team enabled Plan, you can create Team API token(s) for individual Teams you may have access to.  If you have a free Plan, you'll create a Team API token in the default `owners` Team.
 
